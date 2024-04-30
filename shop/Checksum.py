@@ -14,7 +14,7 @@
 # else:
 #     __pad__ = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
 #
-# __unpad__ = lambda s: s[0:-ord(s[-1])]
+# __unpad__ = lambda s: s[0:-ord(s[-1])] if s else s
 #
 #
 # def encrypt(input, key):
@@ -89,7 +89,6 @@
 # def calculateChecksum(params, key, salt):
 #     hashString = calculateHash(params, salt)
 #     return encrypt(hashString, key)
-#
 
 
 import base64
@@ -174,19 +173,31 @@ def __id_generator__(size=6, chars=string.ascii_uppercase + string.digits + stri
     return ''.join(random.choice(chars) for _ in range(size))
 
 
+# def __get_param_string__(params):
+#     params_string = []
+#     for key in sorted(params.keys()):
+#         if("REFUND" in params[key] or "|" in params[key]):
+#             respons_dict = {}
+#             exit()
+#         value = params[key]
+#         params_string.append('' if value == 'null' else str(value))
+#     return '|'.join(params_string)
 def __get_param_string__(params):
     params_string = []
     for key in sorted(params.keys()):
-        if("REFUND" in params[key] or "|" in params[key]):
-            respons_dict = {}
-            exit()
         value = params[key]
-        params_string.append('' if value == 'null' else str(value))
+        if value is None:
+            value = ''
+        elif isinstance(value, str) and ("REFUND" in value or "|" in value):
+            respons_dict = {}  # Not sure what you intended here
+            exit()
+        params_string.append(str(value))
     return '|'.join(params_string)
 
 
 __pad__ = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
-__unpad__ = lambda s: s[0:-ord(s[-1])]
+# __unpad__ = lambda s: s[0:-ord(s[-1])]
+__unpad__ = lambda s: s[0:-ord(s[-1])] if s else s
 
 
 def __encode__(to_encode, iv, key):
@@ -229,3 +240,4 @@ if __name__ == "__main__":
         "CD5ndX8VVjlzjWbbYoAtKQIlvtXPypQYOg0Fi2AUYKXZA5XSHiRF0FDj7vQu66S8MHx9NaDZ/uYm3WBOWHf+sDQAmTyxqUipA7i1nILlxrk="))
 
     # print(generate_checksum(params, "xxxxxxxxxxxxxxxx"))
+

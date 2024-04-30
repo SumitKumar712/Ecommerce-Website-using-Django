@@ -5,11 +5,12 @@
     {{response}}
     <div class="col my-4">
 
-        <h2>Payment status regarding your order Id {{response.ORDERID}}</h2>
+        <h2>Payment status regarding your order Id :{{response.ORDERID}} is successful</h2>
+        Thank you for using My Awesome Cart!
         {% if response.RESPCODE == '01' %}
-        ORDER SUCCESS
+            ORDER FAILURE
         {% else %}
-        ORDER FAILURE
+            <br>ORDER SUCCESS!</br>
         {% endif%}
 
     </div>

@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Product, Contact, Orders, OrderUpdate
 from . import Checksum
 
+
 # MERCHANT_KEY = 'kbzk1DSbJiV_O3p5'
 MERCHANT_KEY = 'aVqMVc6bHGQMmH4y'
 MID="ShbtsP58969058341589"
@@ -23,7 +24,7 @@ def index(request):
         nSlides = n // 4 + ceil((n / 4) - (n // 4))
         allProds.append([prod, range(1, nSlides), nSlides])
     params = {'allProds': allProds}
-    return render(request, 'shop/index.html', params)
+    return render(request, '/shop/index.html', params)
 
 def searchMatch(query, item):
     '''return true only if query matches the item'''
@@ -124,7 +125,7 @@ def checkout(request):
         # return render(request, 'shop/checkout.html', {'thank': thank, 'id': id})
         # Request paytm to transfer the amount to your account after payment by user
         param_dict = {
-            'MID': MID,
+            'MID': 'ShbtsP58969058341589',
             'ORDER_ID': str(order.order_id),
             'TXN_AMOUNT': str(amount),
             'CUST_ID': email,
@@ -133,8 +134,8 @@ def checkout(request):
             'CHANNEL_ID': 'WEB',
             'CALLBACK_URL': 'http://127.0.0.1:8000/shop/handlerequest/',
         }
-        # param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)
-        param_dict['CHECKSUMHASH'] = Checksum.generateSignature(param_dict, MERCHANT_KEY)
+        param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict, MERCHANT_KEY)
+        # param_dict['CHECKSUMHASH'] = Checksum.generateSignature(param_dict, MERCHANT_KEY)
         print(param_dict)
         return render(request, 'shop/paytm.html', {'param_dict': param_dict})
 
@@ -146,14 +147,16 @@ def handlerequest(request):
     # paytm will send you post request here
     form = request.POST
     response_dict = {}
+    checksum = ''
     for i in form.keys():
         response_dict[i] = form[i]
         if i == 'CHECKSUMHASH':
             checksum = form[i]
 
-    verify = Checksum.verifySignature(response_dict, MERCHANT_KEY, checksum)
+    verify = Checksum.verify_checksum(response_dict, MERCHANT_KEY, checksum)
+    # verify = Checksum.verifySignature(response_dict, MERCHANT_KEY, checksum)
     if verify:
-        if response_dict['RESPCODE'] == '01':
+        if response_dict['RESP CODE'] == '01':
             print('order successful')
         else:
             print('order was not successful because' + response_dict['RESPMSG'])
